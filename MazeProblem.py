@@ -1,53 +1,90 @@
-"""
-Insert your code bellow 
+from collections import deque
 
-our task is to implement an algorithm that can find the way out of a maze.
+def resolver_laberinto(laberinto):
+   
+    if not laberinto or not laberinto[0]:
+        return None
+    
+    filas = len(laberinto)
+    columnas = len(laberinto[0])
+    
+    inicio = (0, 0)
+   
+    final = (filas - 1, columnas - 1)
+    
+    if laberinto[inicio[0]][inicio[1]] == 0 or laberinto[final[0]][final[1]] == 0:
+        return None
+    
+    movimientos = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    
+    cola = deque()
+    cola.append(inicio)
+    
+    procedencia = {}
+    procedencia[inicio] = None
+    
+    encontrado = False
+    while cola:
+        actual = cola.popleft()
+        
+        if actual == final:
+            encontrado = True
+            break
+        
+        
+        for movimiento in movimientos:
+            nueva_fila = actual[0] + movimiento[0]
+            nueva_col = actual[1] + movimiento[1]
+            
+            
+            if (0 <= nueva_fila < filas and 0 <= nueva_col < columnas and 
+                laberinto[nueva_fila][nueva_col] == 1 and (nueva_fila, nueva_col) not in procedencia):
+                procedencia[(nueva_fila, nueva_col)] = actual
+                cola.append((nueva_fila, nueva_col))
+    
+    
+    if not encontrado:
+        return None
+    
+    
+    camino = []
+    actual = final
+    while actual != inicio:
+        camino.append(actual)
+        actual = procedencia[actual]
+    camino.append(inicio)
+    camino.reverse()  
+    
+   
+    solucion = [[0 for _ in range(columnas)] for _ in range(filas)]
+    for fila, col in camino:
+        solucion[fila][col] = 'S'
+    
+    return solucion
 
-The maze representation is like this:
-
-    [
-      [1,1,1,1,1],
-      [1,0,0,1,1],
-      [1,1,0,1,1],
-      [1,1,0,0,0],
-      [1,1,1,1,1],
-    ]
-
-So we have a map like this
-
-    integer 0 represents walls
-
-    integer 1 represents valid cells
-
-    cell (0,0) is the starting point (it is the top left corner)
-
-    the bottom right cell is the destination (so this is what we are looking for)
-
-So the solution should be something like this (S represents the states in the solution set):
-
-    [
-      [S,-,-,-,-],
-      [S,-,-,-,-],
-      [S,-,-,-,-],
-      [S,-,-,-,-],
-      [S,S,S,S,S],
-    ]
-
-Good luck!
-
-
-"""
+def mostrar_laberinto(laberinto, solucion=None):
+    for i in range(len(laberinto)):
+        fila_mostrar = []
+        for j in range(len(laberinto[0])):
+            if solucion and solucion[i][j] == 'S':
+                fila_mostrar.append('S')
+            elif laberinto[i][j] == 1:
+                fila_mostrar.append('.')
+            else:
+                fila_mostrar.append('#')
+        print(' '.join(fila_mostrar))
+    print()
 
 if __name__ == '__main__':
-    ### Your code must succesfully solve the following mazes:
     
-    m = [[1, 0, 0, 1],
-         [1, 0, 0, 1],
-         [1, 0, 0, 1],
-         [1, 1, 1, 1]
-         ]
-
-    easy_maze = [
+    laberinto_simple = [
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1]
+    ]
+    
+    laberinto_facil = [
         [1, 1, 1, 0, 1],
         [1, 0, 1, 0, 1],
         [1, 0, 1, 1, 1],
@@ -55,7 +92,7 @@ if __name__ == '__main__':
         [0, 1, 1, 1, 1]
     ]
 
-    medium_maze = [
+    laberinto_medio = [
         [1, 1, 0, 1, 1, 0],
         [0, 1, 0, 1, 0, 1],
         [1, 1, 1, 1, 1, 1],
@@ -63,7 +100,8 @@ if __name__ == '__main__':
         [1, 1, 1, 1, 1, 1],
         [0, 0, 1, 0, 0, 1]
     ]   
-    hard_maze = [
+    
+    laberinto_dificil = [
         [1, 0, 1, 1, 1, 0, 1],
         [1, 0, 1, 0, 1, 0, 1],
         [1, 1, 1, 0, 1, 1, 1],
@@ -72,4 +110,16 @@ if __name__ == '__main__':
         [1, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1]
     ]
-
+    
+    
+    for lab in [laberinto_simple, laberinto_facil, laberinto_medio, laberinto_dificil]:
+        print("Laberinto original:")
+        mostrar_laberinto(lab)
+        
+        sol = resolver_laberinto(lab)
+        if sol:
+            print("Solución encontrada:")
+            mostrar_laberinto(lab, sol)
+        else:
+            print("No hay solución para este laberinto")
+        print("-" * 40)
